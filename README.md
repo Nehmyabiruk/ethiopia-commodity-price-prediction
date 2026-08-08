@@ -210,13 +210,9 @@ The main dependencies are listed in `requirements.txt`, including:
 
 ## Future Improvements
 
-* Add more Ethiopian commodities and markets
-* Incorporate weather and seasonal information
-* Add real-time market data updates
 * Add prediction history
 * Add price trend visualization
 * Add confidence intervals for predictions
-* Improve model performance with additional forecasting approaches
 * Add a database for storing predictions and market updates
 
 ## Author
