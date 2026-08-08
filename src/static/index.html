@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commodity Price Predictor</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --panel: #1f2937;
+        --surface: #111827;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --accent-2: #7dd3fc;
+        --success: #22c55e;
+        --shadow: rgba(15, 23, 42, 0.5);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #0f172a 0%, #020617 60%);
+        color: var(--text);
+      }
+
+      .page {
+        width: min(1140px, 100%);
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 24px;
+        align-items: center;
+        margin-bottom: 32px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 3vw, 3.4rem);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        margin: 0;
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.8;
+      }
+
+      .grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+
+      .panel {
+        padding: 28px;
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        box-shadow: 0 28px 60px var(--shadow);
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .form-grid label {
+        display: block;
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      .form-grid input,
+      .form-grid select {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+
+      .form-grid input:focus,
+      .form-grid select:focus {
+        outline: none;
+        border-color: rgba(56, 189, 248, 0.8);
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+      }
+
+      .submit-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-top: 16px;
+      }
+
+      button {
+        width: 100%;
+        padding: 16px 22px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #020617;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 36px rgba(56, 189, 248, 0.2);
+      }
+
+      .output,
+      .hint {
+        border-radius: 18px;
+        background: rgba(30, 41, 59, 0.95);
+        padding: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+      }
+
+      .output h2,
+      .hint h2 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 1.3rem;
+      }
+
+      .output p {
+        margin: 0;
+        font-size: 2.15rem;
+        font-weight: 700;
+        color: var(--accent-2);
+      }
+
+      .error {
+        margin-top: 12px;
+        color: #ffb703;
+        font-size: 0.98rem;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div>
+          <h1>Commodity Price Prediction</h1>
+          <p>
+            Enter the market details and month. The application computes lagged and rolling features from historical data and returns a price prediction.
+          </p>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="panel">
+          <div class="hint">
+            <h2>Quick note</h2>
+            <p>
+              Only six values are required. The model automatically derives location, lagged prices, and rolling statistics from past market data.
+            </p>
+          </div>
+
+          <form id="prediction-form" class="form-grid">
+            <div>
+              <label for="country">Country</label>
+              <input id="country" name="country" type="text" value="Ethiopia" required />
+            </div>
+
+            <div>
+              <label for="admin_1">Admin 1</label>
+              <input id="admin_1" name="admin_1" type="text" value="Tigray" required />
+            </div>
+
+            <div>
+              <label for="market">Market</label>
+              <input id="market" name="market" type="text" value="Abi Adi" required />
+            </div>
+
+            <div>
+              <label for="currency">Currency</label>
+              <input id="currency" name="currency" type="text" value="ETB" required />
+            </div>
+
+            <div>
+              <label for="product">Product</label>
+              <input id="product" name="product" type="text" value="maize" required />
+            </div>
+
+            <div>
+              <label for="year">Year</label>
+              <input id="year" name="year" type="number" value="2026" min="2000" required />
+            </div>
+
+            <div>
+              <label for="month">Month</label>
+              <input id="month" name="month" type="number" value="7" min="1" max="12" required />
+            </div>
+
+            <div class="submit-row">
+              <button type="submit">Predict Price</button>
+            </div>
+          </form>
+
+          <div class="error" id="error-message"></div>
+        </section>
+
+        <aside class="panel output" id="result-panel" style="display: none;">
+          <h2>Predicted Price</h2>
+          <p id="predicted-price">--</p>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("prediction-form");
+      const resultPanel = document.getElementById("result-panel");
+      const resultText = document.getElementById("predicted-price");
+      const errorMessage = document.getElementById("error-message");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorMessage.textContent = "";
+        resultPanel.style.display = "none";
+
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+        payload.year = Number(payload.year);
+        payload.month = Number(payload.month);
+
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.detail || "Prediction failed");
+          }
+
+          const data = await response.json();
+          resultText.textContent = data.predicted_price.toFixed(2);
+          resultPanel.style.display = "block";
+        } catch (error) {
+          errorMessage.textContent = error.message;
+        }
+      });
+    </script>
+  </body>
+</html>

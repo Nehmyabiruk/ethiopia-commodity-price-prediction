@@ -2,128 +2,113 @@
 
 ## Overview
 
-This project aims to predict future commodity prices in Ethiopia using Machine Learning and historical market data.
+This repository predicts Ethiopian commodity prices using a machine learning pipeline and provides a prediction API with a simple frontend.
 
-The project focuses on essential Ethiopian commodities such as:
+It includes:
+- feature engineering for time-series and lag features
+- XGBoost model training
+- evaluation metrics and plot export
+- FastAPI prediction service
+- single-page frontend UI
+- Docker deployment support
 
-- Teff
-- Maize
-- Wheat
-- Sorghum
-- Livestock (Goat)
+## Repository Structure
 
-The goal is to build a forecasting system that can help understand price trends and support decision-making for farmers, businesses, and organizations.
-
----
-
-## Project Objectives
-
-- Collect and combine historical commodity price datasets.
-- Clean and preprocess Ethiopian market data.
-- Engineer time-series features.
-- Train machine learning models for price prediction.
-- Evaluate model performance.
-- Deploy a prediction system.
-
----
-
-## Dataset Sources
-
-The project uses:
-
-- Ethiopian market price data.
-- FEWS NET staple food price data.
-
-The raw datasets are not included in this repository because of their size.
-
----
-
-## Project Structure
+```
 commodity-predict/
-
-│
 ├── data/
-│ ├── raw/
-│ └── processed/
-│
-├── notebooks/
-│
-├── src/
-│ ├── clean_rtfp.py
-│ ├── clean_fews.py
-│ ├── merge_data.py
-│ ├── feature_engineering.py
-│ ├── train.py
-│ ├── evaluate.py
-│ └── predict.py
-│
+│   ├── raw/
+│   └── processed/
 ├── models/
-│
+├── notebooks/
+├── src/
+│   ├── app.py
+│   ├── static/
+│   │   └── index.html
+│   └── data/
+│       ├── __init__.py
+│       ├── eda.py
+│       ├── evaluate.py
+│       ├── feature_engineering.py
+│       ├── predict.py
+│       ├── train.py
+│       └── utils.py
+├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
-│
 └── README.md
+```
 
+## Setup
 
----
+Install dependencies:
 
-## Data Processing Pipeline
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-The preprocessing pipeline contains:
+Make sure the processed dataset exists at:
 
-1. Loading raw datasets.
-2. Selecting required columns.
-3. Reshaping data into a consistent format.
-4. Removing missing values.
-5. Removing duplicate records.
-6. Combining multiple datasets.
+- `data/processed/combined_data.csv`
 
----
+## Training
 
-## Machine Learning Workflow
+Train the model with:
 
-The planned workflow:
+```powershell
+python -m src.data.train
+```
 
+This will:
+- load processed training data
+- engineer features
+- perform hyperparameter search with TimeSeriesSplit
+- fit a pipeline that includes preprocessing
+- save the model to `commodity_price_forecasting_pipeline.pkl`
+- save predictions to `prediction_results.csv`
+- save a plot to `prediction_plot.png`
 
-Data Collection
-|
-↓
-Data Cleaning
-|
-↓
-Feature Engineering
-|
-↓
-Model Training
-|
-↓
-Model Evaluation
-|
-↓
-Prediction
+## API
 
+Start the FastAPI service:
 
----
+```powershell
+uvicorn src.app:app --reload
+```
 
-## Technologies Used
+Open in the browser:
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- Matplotlib
-- Jupyter Notebook
-- Git
+- `http://127.0.0.1:8000/` — frontend form
+- `http://127.0.0.1:8000/docs` — Swagger UI
 
----
+## Frontend
 
-## Future Improvements
+The page at `src/static/index.html` lets you enter model features and returns a predicted price.
 
+## Docker
 
-- Build time-series forecasting models.
-- Create an API for predictions.
-- Deploy the model.
+Build and run the container:
 
----
+```powershell
+docker build -t commodity-predict .
+docker run -p 8000:8000 commodity-predict
+```
+
+Or use docker-compose:
+
+```powershell
+docker-compose up --build
+```
+
+## Requirements
+
+Dependencies are in `requirements.txt`.
+
+## Notes
+
+- Run training before using the API so `commodity_price_forecasting_pipeline.pkl` is available.
+- If you prefer, you can use `python src\data\eda.py` to invoke training from the old entry point.
 
 ## Author
 
