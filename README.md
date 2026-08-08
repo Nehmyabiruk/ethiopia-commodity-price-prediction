@@ -1,6 +1,6 @@
 # Ethiopia Commodity Price Prediction
 
-An ML-powered web application for predicting commodity prices in Ethiopian markets using historical market data, lag features, rolling statistics, and XGBoost.
+An ML-powered web application for predicting commodity prices in Ethiopian markets using historical market data, time-series features, and XGBoost.
 
 ## 🚀 Live Demo
 
@@ -8,29 +8,59 @@ An ML-powered web application for predicting commodity prices in Ethiopian marke
 
 ## Features
 
-- Ethiopian market commodity price prediction
-- Market and product selection
-- Automatic lag feature generation
-- Rolling price statistics
-- XGBoost prediction model
-- FastAPI backend
-- Live deployment on Render
+* Ethiopian commodity price prediction
+* Market and product selection
+* Time-series feature engineering
+* Automatic lag feature generation
+* Rolling price statistics
+* Price-change features
+* XGBoost machine learning model
+* FastAPI prediction API
+* Single-page frontend interface
+* Live deployment on Render
 
 ## Overview
 
-This repository predicts Ethiopian commodity prices using a machine learning pipeline and provides a prediction API with a simple frontend.
+This project predicts commodity prices in Ethiopian markets using historical market data and machine learning.
 
-It includes:
-- feature engineering for time-series and lag features
-- XGBoost model training
-- evaluation metrics and plot export
-- FastAPI prediction service
-- single-page frontend UI
-- Docker deployment support
+The system uses historical prices to generate time-series features such as:
+
+* Lag 1, 3, 6, and 12 months
+* Rolling 3, 6, and 12 month averages
+* Price changes over different time periods
+* Calendar features such as year, month, and quarter
+* Market and geographic information
+
+The trained XGBoost model is exposed through a FastAPI backend and connected to a simple web-based frontend.
+
+## Project Architecture
+
+```text
+User
+ │
+ ▼
+Frontend
+ │
+ │ Prediction Request
+ ▼
+FastAPI API
+ │
+ ├── Feature Engineering
+ ├── Historical Market Data
+ └── XGBoost Model
+ │
+ ▼
+Predicted Commodity Price
+ │
+ ▼
+Frontend
+```
+
+The application is deployed as a Python web service on Render.
 
 ## Repository Structure
 
-```
+```text
 commodity-predict/
 ├── data/
 │   ├── raw/
@@ -49,13 +79,30 @@ commodity-predict/
 │       ├── predict.py
 │       ├── train.py
 │       └── utils.py
-├── Dockerfile
-├── docker-compose.yml
 ├── requirements.txt
 └── README.md
 ```
 
 ## Setup
+
+Clone the repository:
+
+```powershell
+git clone https://github.com/Nehmyabiruk/ethiopia-commodity-price-prediction.git
+cd ethiopia-commodity-price-prediction
+```
+
+Create a virtual environment:
+
+```powershell
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\activate
+```
 
 Install dependencies:
 
@@ -66,7 +113,9 @@ python -m pip install -r requirements.txt
 
 Make sure the processed dataset exists at:
 
-- `data/processed/combined_data.csv`
+```text
+data/processed/combined_data.csv
+```
 
 ## Training
 
@@ -76,56 +125,98 @@ Train the model with:
 python -m src.data.train
 ```
 
-This will:
-- load processed training data
-- engineer features
-- perform hyperparameter search with TimeSeriesSplit
-- fit a pipeline that includes preprocessing
-- save the model to `commodity_price_forecasting_pipeline.pkl`
-- save predictions to `prediction_results.csv`
-- save a plot to `prediction_plot.png`
+The training process:
+
+* loads the processed market data
+* performs feature engineering
+* creates time-series and lag features
+* uses TimeSeriesSplit for time-aware validation
+* performs model training and hyperparameter tuning
+* fits the preprocessing and XGBoost pipeline
+* saves the trained model
+* generates prediction results
+* exports evaluation plots
 
 ## API
 
-Start the FastAPI service:
+Start the FastAPI service locally:
 
 ```powershell
 uvicorn src.app:app --reload
 ```
 
-Open in the browser:
+Open the application in your browser:
 
-- `http://127.0.0.1:8000/` — frontend form
-- `http://127.0.0.1:8000/docs` — Swagger UI
+```text
+http://127.0.0.1:8000/
+```
+
+FastAPI Swagger documentation:
+
+```text
+http://127.0.0.1:8000/docs
+```
 
 ## Frontend
 
-The page at `src/static/index.html` lets you enter model features and returns a predicted price.
+The frontend is served by the FastAPI application.
 
-## Docker
+Users can select:
 
-Build and run the container:
+* Country
+* Administrative region
+* Market
+* Product
+* Year
+* Month
 
-```powershell
-docker build -t commodity-predict .
-docker run -p 8000:8000 commodity-predict
+The application then sends the prediction request to the FastAPI backend and displays the predicted commodity price.
+
+Time-series features such as lag values, rolling averages, and price changes are handled by the backend rather than requiring the user to enter them manually.
+
+## Deployment
+
+The application is deployed on **Render** as a Python web service.
+
+### Render Start Command
+
+```bash
+uvicorn src.app:app --host 0.0.0.0 --port $PORT
 ```
 
-Or use docker-compose:
+The application does not require a database for the current version.
 
-```powershell
-docker-compose up --build
-```
+The trained model and required historical data are packaged with the application and loaded by the FastAPI service.
 
 ## Requirements
 
-Dependencies are in `requirements.txt`.
+The main dependencies are listed in `requirements.txt`, including:
+
+* Python
+* Pandas
+* NumPy
+* Scikit-learn
+* XGBoost
+* FastAPI
+* Uvicorn
+* Joblib
 
 ## Notes
 
-- Run training before using the API so `commodity_price_forecasting_pipeline.pkl` is available.
-- If you prefer, you can use `python src\data\eda.py` to invoke training from the old entry point.
+* The model must be trained before using the prediction API if the trained model is not already included.
+* Historical data is used to generate time-series features required by the prediction model.
+* The application currently does not store user predictions in a database.
+* Render's free service may spin down after periods of inactivity, so the first request after inactivity may take longer.
+
+## Future Improvements
+
+* Add prediction history
+* Add price trend visualization
+* Add confidence intervals for predictions
+* Add a database for storing predictions and market updates
 
 ## Author
 
-Nehmya Biruk
+**Nehmya Biruk**
+
+GitHub: [@Nehmyabiruk](https://github.com/Nehmyabiruk/)
