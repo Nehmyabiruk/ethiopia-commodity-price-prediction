@@ -189,37 +189,37 @@
           <form id="prediction-form" class="form-grid">
             <div>
               <label for="country">Country</label>
-              <input id="country" name="country" type="text" value="Ethiopia" required />
+              <select id="country" name="country" required></select>
             </div>
 
             <div>
               <label for="admin_1">Admin 1</label>
-              <input id="admin_1" name="admin_1" type="text" value="Tigray" required />
+              <select id="admin_1" name="admin_1" required></select>
             </div>
 
             <div>
               <label for="market">Market</label>
-              <input id="market" name="market" type="text" value="Abi Adi" required />
+              <select id="market" name="market" required></select>
             </div>
 
             <div>
               <label for="currency">Currency</label>
-              <input id="currency" name="currency" type="text" value="ETB" required />
+              <select id="currency" name="currency" required></select>
             </div>
 
             <div>
               <label for="product">Product</label>
-              <input id="product" name="product" type="text" value="maize" required />
+              <select id="product" name="product" required></select>
             </div>
 
             <div>
               <label for="year">Year</label>
-              <input id="year" name="year" type="number" value="2026" min="2000" required />
+              <select id="year" name="year" required></select>
             </div>
 
             <div>
               <label for="month">Month</label>
-              <input id="month" name="month" type="number" value="7" min="1" max="12" required />
+              <select id="month" name="month" required></select>
             </div>
 
             <div class="submit-row">
@@ -242,6 +242,121 @@
       const resultPanel = document.getElementById("result-panel");
       const resultText = document.getElementById("predicted-price");
       const errorMessage = document.getElementById("error-message");
+
+      const selects = {
+        country: document.getElementById("country"),
+        admin_1: document.getElementById("admin_1"),
+        market: document.getElementById("market"),
+        currency: document.getElementById("currency"),
+        product: document.getElementById("product"),
+        year: document.getElementById("year"),
+        month: document.getElementById("month"),
+      };
+
+      let options = null;
+
+      function createOption(value, selected = false) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        if (selected) option.selected = true;
+        return option;
+      }
+
+      function setOptions(select, values, currentValue) {
+        const previous = currentValue && values.includes(currentValue) ? currentValue : null;
+        select.innerHTML = "";
+        values.forEach((value) => select.appendChild(createOption(value, value === previous)));
+        if (previous === null && values.length > 0) {
+          select.value = values[0];
+        }
+      }
+
+      function getFilteredOptions() {
+        const combos = options.combos;
+        const admin1 = selects.admin_1.value;
+        const market = selects.market.value;
+
+        const validCountries = [...new Set(combos.map((row) => row.country))].sort();
+        const validAdmin1 = [...new Set(combos.map((row) => row.admin_1))].sort();
+        const validMarket = [...new Set(combos.map((row) => row.market))].sort();
+        const validProduct = [...new Set(combos.map((row) => row.product))].sort();
+        const validCurrency = [...new Set(combos.map((row) => row.currency))].sort();
+
+        let marketFilter = validMarket;
+        let productFilter = validProduct;
+        let currencyFilter = validCurrency;
+
+        if (admin1) {
+          const adminRows = combos.filter((row) => row.admin_1 === admin1);
+          marketFilter = [...new Set(adminRows.map((row) => row.market))].sort();
+          productFilter = [...new Set(adminRows.map((row) => row.product))].sort();
+          currencyFilter = [...new Set(adminRows.map((row) => row.currency))].sort();
+        }
+
+        if (admin1 && market) {
+          const comboRows = combos.filter(
+            (row) => row.admin_1 === admin1 && row.market === market
+          );
+          productFilter = [...new Set(comboRows.map((row) => row.product))].sort();
+          currencyFilter = [...new Set(comboRows.map((row) => row.currency))].sort();
+        }
+
+        return {
+          country: validCountries,
+          admin_1: validAdmin1,
+          market: marketFilter,
+          product: productFilter,
+          currency: currencyFilter,
+          year: options.year,
+          month: options.month,
+        };
+      }
+
+      function refreshDropdowns() {
+        const filtered = getFilteredOptions();
+        const currentMarket = selects.market.value;
+        const currentProduct = selects.product.value;
+        const currentCurrency = selects.currency.value;
+
+        setOptions(selects.market, filtered.market, currentMarket);
+        setOptions(selects.product, filtered.product, currentProduct);
+        setOptions(selects.currency, filtered.currency, currentCurrency);
+      }
+
+      function onSelectionChange(event) {
+        if (event.target === selects.admin_1) {
+          refreshDropdowns();
+        }
+        if (event.target === selects.market) {
+          refreshDropdowns();
+        }
+      }
+
+      async function loadOptions() {
+        try {
+          const response = await fetch("/options");
+          if (!response.ok) {
+            throw new Error("Unable to load dropdown options");
+          }
+
+          options = await response.json();
+          setOptions(selects.country, options.country, options.country[0]);
+          setOptions(selects.admin_1, options.admin_1, options.admin_1[0]);
+          setOptions(selects.market, options.market, options.market[0]);
+          setOptions(selects.currency, options.currency, options.currency[0]);
+          setOptions(selects.product, options.product, options.product[0]);
+          setOptions(selects.year, options.year, options.year[0]);
+          setOptions(selects.month, options.month, options.month[0]);
+
+          refreshDropdowns();
+        } catch (error) {
+          errorMessage.textContent = error.message;
+        }
+      }
+
+      selects.admin_1.addEventListener("change", onSelectionChange);
+      selects.market.addEventListener("change", onSelectionChange);
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -272,6 +387,8 @@
           errorMessage.textContent = error.message;
         }
       });
+
+      loadOptions();
     </script>
   </body>
 </html>
