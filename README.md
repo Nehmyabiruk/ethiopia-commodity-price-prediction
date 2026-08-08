@@ -1,5 +1,21 @@
 # Ethiopia Commodity Price Prediction
 
+An ML-powered web application for predicting commodity prices in Ethiopian markets using historical market data, lag features, rolling statistics, and XGBoost.
+
+## 🚀 Live Demo
+
+[**Open Ethiopia Commodity Price Predictor →**](https://ethiopia-commodity-price-prediction.onrender.com/)
+
+## Features
+
+- Ethiopian market commodity price prediction
+- Market and product selection
+- Automatic lag feature generation
+- Rolling price statistics
+- XGBoost prediction model
+- FastAPI backend
+- Live deployment on Render
+
 ## Overview
 
 This repository predicts Ethiopian commodity prices using a machine learning pipeline and provides a prediction API with a simple frontend.
